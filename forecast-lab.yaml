@@ -2,7 +2,7 @@ substitutions:
   device_name: forecast-lab
   project_name: "forecast.lab"
   friendly_name: "Forecast Lab"
-  version: "1.1.0"
+  version: "1.2.0"
 
 esphome:
   name: ${device_name}
@@ -74,6 +74,78 @@ font:
   - file: "gfonts://Roboto"
     id: small
     size: 20
+  - file: "gfonts://Roboto"
+    id: cyr_small
+    size: 20
+    glyphs:
+      - " "
+      - ":"
+      - "А"
+      - "Б"
+      - "В"
+      - "Г"
+      - "Ґ"
+      - "Д"
+      - "Е"
+      - "Є"
+      - "Ж"
+      - "З"
+      - "И"
+      - "І"
+      - "Ї"
+      - "Й"
+      - "К"
+      - "Л"
+      - "М"
+      - "Н"
+      - "О"
+      - "П"
+      - "Р"
+      - "С"
+      - "Т"
+      - "У"
+      - "Ф"
+      - "Х"
+      - "Ц"
+      - "Ч"
+      - "Ш"
+      - "Щ"
+      - "Ь"
+      - "Ю"
+      - "Я"
+      - "а"
+      - "б"
+      - "в"
+      - "г"
+      - "ґ"
+      - "д"
+      - "е"
+      - "є"
+      - "ж"
+      - "з"
+      - "и"
+      - "і"
+      - "ї"
+      - "й"
+      - "к"
+      - "л"
+      - "м"
+      - "н"
+      - "о"
+      - "п"
+      - "р"
+      - "с"
+      - "т"
+      - "у"
+      - "ф"
+      - "х"
+      - "ц"
+      - "ч"
+      - "ш"
+      - "щ"
+      - "ь"
+      - "ю"
+      - "я"
 
 sensor:
   - platform: uptime
@@ -100,6 +172,11 @@ sensor:
     id: weather_wind_speed
     entity_id: weather.forecast_home
     attribute: wind_speed
+
+binary_sensor:
+  - platform: homeassistant
+    id: air_alert
+    entity_id: binary_sensor.m_kiiv_air
 
 text_sensor:
   - platform: homeassistant
@@ -150,6 +227,10 @@ image:
     id: icon_weather_windy
     resize: 26x26
     type: binary
+  - file: mdi:rocket-launch-outline
+    id: icon_rocket_launch
+    resize: 20x20
+    type: binary
 
 display:
   - platform: mipi_spi
@@ -171,11 +252,21 @@ display:
     invert_colors: true
     update_interval: 1s
     lambda: |-
-      it.fill(Color::BLACK);
-      it.printf(10, 12, id(small), Color::WHITE, "Forecast Lab");
+
+      Color bg = id(air_alert).state ? Color(0, 0, 37) : Color::BLACK;
+      it.fill(bg);
+
+      if (id(air_alert).state) {
+        it.image(10, 12, id(icon_rocket_launch), Color(255, 80, 80), bg);
+        it.printf(35, 12, id(cyr_small), Color(255, 80, 80), "ТРИВОГА");
+      } else { 
+        it.image(10, 12, id(icon_rocket_launch), Color(180, 180, 180), bg);
+        it.printf(35, 12, id(cyr_small), Color(180, 180, 180), "Безпечно");
+      }
+
       it.line(10, 40, 230, 40, Color(80, 80, 80));
 
-      it.image(10, 153, id(icon_weather_humidity), Color(215, 185, 155));
+      it.image(10, 153, id(icon_weather_humidity), Color(215, 185, 155), bg);
 
       if (!isnan(id(outside_temp).state)) {
         it.printf(100, 70, id(large), Color(200, 200, 200), "%.1f°", id(outside_temp).state);
@@ -190,7 +281,7 @@ display:
       }
 
       if (!isnan(id(weather_wind_speed).state)) {
-        it.image(100, 153, id(icon_weather_windy), Color(215, 185, 155));
+        it.image(100, 153, id(icon_weather_windy), Color(215, 185, 155), bg);
         it.printf(130, 150, id(medium), Color(180, 180, 180), "%.1f m/s", id(weather_wind_speed).state);
       }
 
@@ -199,15 +290,15 @@ display:
         auto s = id(weather_state).state;
 
         if (s == "sunny" || s == "clear-night") {
-          it.image(10, 58, id(icon_weather_sunny), Color(255, 215, 0));
+          it.image(10, 58, id(icon_weather_sunny), Color(0, 215, 255), bg);
         } else if (s == "cloudy" || s == "partlycloudy" || s == "overcast") {
-          it.image(10, 58, id(icon_weather_cloudy), Color(240, 185, 115));
+          it.image(10, 58, id(icon_weather_cloudy), Color(240, 185, 115), bg);
         } else if (s == "rainy" || s == "pouring" || s == "lightning-rainy") {
-          it.image(10, 58, id(icon_weather_rainy), Color(90, 170, 255));
+          it.image(10, 58, id(icon_weather_rainy), Color(255, 170, 90), bg);
         } else if (s == "snowy" || s == "snowy-rainy") {
-          it.image(10, 58, id(icon_weather_snowy), Color::WHITE);
+          it.image(10, 58, id(icon_weather_snowy), Color::WHITE, bg);
         } else if (s == "lightning") {
-          it.image(10, 58, id(icon_weather_lightning), Color(255, 220, 80));
+          it.image(10, 58, id(icon_weather_lightning), Color(255, 220, 80), bg);
         }
       } else {
         it.printf(10, 58, id(medium), Color(180, 180, 180), "no data");
