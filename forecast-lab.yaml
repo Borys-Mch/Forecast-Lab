@@ -2,7 +2,7 @@ substitutions:
   device_name: forecast-lab
   project_name: "forecast.lab"
   friendly_name: "Forecast Lab"
-  version: "1.2.0"
+  version: "1.3.0"
 
 esphome:
   name: ${device_name}
@@ -67,7 +67,7 @@ font:
       family: Roboto
       weight: 900
     id: large
-    size: 58
+    size: 56
   - file: "gfonts://Roboto"
     id: medium
     size: 28
@@ -173,6 +173,10 @@ sensor:
     entity_id: weather.forecast_home
     attribute: wind_speed
 
+  - platform: homeassistant
+    id: battery_level
+    entity_id: sensor.battery_monitor_4s_battery_level
+
 binary_sensor:
   - platform: homeassistant
     id: air_alert
@@ -231,6 +235,22 @@ image:
     id: icon_rocket_launch
     resize: 20x20
     type: binary
+  - file: mdi:battery-high
+    id: icon_battery_full
+    resize: 26x26
+    type: binary
+  - file: mdi:battery-medium
+    id: icon_battery_medium
+    resize: 26x26
+    type: binary
+  - file: mdi:battery-low
+    id: icon_battery_low
+    resize: 26x26
+    type: binary
+  - file: mdi:battery-alert-variant-outline
+    id: icon_battery_empty
+    resize: 26x26
+    type: binary
 
 display:
   - platform: mipi_spi
@@ -262,6 +282,24 @@ display:
       } else { 
         it.image(10, 12, id(icon_rocket_launch), Color(180, 180, 180), bg);
         it.printf(35, 12, id(cyr_small), Color(180, 180, 180), "Безпечно");
+      }
+
+      if (id(battery_level).has_state() && !isnan(id(battery_level).state)) {
+        auto bat = id(battery_level).state;
+
+        if (bat >= 90) {
+          it.image(170, 10, id(icon_battery_full), Color(130, 215, 35), bg);
+        } else if (bat >= 75) {
+          it.image(170, 10, id(icon_battery_medium), Color(35, 215, 188), bg);
+        } else if (bat >= 35) {
+          it.image(170, 10, id(icon_battery_low), Color(35, 135, 215), bg);
+        } else {
+          it.image(170, 10, id(icon_battery_empty), Color(35, 42, 215), bg);
+        }
+        it.printf(195, 12, id(small), Color(180, 180, 180), "%.0f%%", bat);
+      } else {
+        it.image(170, 10, id(icon_battery_empty), Color(120, 120, 120), bg);
+        it.printf(195, 12, id(small), Color(140, 140, 140), "--%%");
       }
 
       it.line(10, 40, 230, 40, Color(80, 80, 80));

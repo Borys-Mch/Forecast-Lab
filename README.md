@@ -19,16 +19,16 @@
 
 Поточна робоча розпайка:
 
-| Пін дисплея | Пін ESP32-S3 |
-|---|---|
-| `BL`  | `GPIO7` |
-| `CS`  | `GPIO12` |
-| `DC`  | `GPIO11` |
-| `RST` | `GPIO10` |
-| `SDA` | `GPIO13` (MOSI) |
-| `SCL` | `GPIO14` (CLK) |
-| `VCC` | `3V3` |
-| `GND` | `GND` |
+| Пін дисплея | Пін ESP32-S3    |
+| ----------- | --------------- |
+| `BL`        | `GPIO7`         |
+| `CS`        | `GPIO12`        |
+| `DC`        | `GPIO11`        |
+| `RST`       | `GPIO10`        |
+| `SDA`       | `GPIO13` (MOSI) |
+| `SCL`       | `GPIO14` (CLK)  |
+| `VCC`       | `3V3`           |
+| `GND`       | `GND`           |
 
 ## Структура проєкту
 
@@ -42,6 +42,8 @@
 
 - `sensor.vulitsia_t_h_a_temperature`
 - `sensor.vulitsia_t_h_a_humidity`
+- `binary_sensor.m_kiiv_air`
+- `sensor.battery_monitor_4s_battery_level`
 - `weather.forecast_home` (стан + атрибут `wind_speed`)
 
 Якщо у вас інші `entity_id`, замініть їх у `forecast-lab.yaml` в блоках `sensor:` і `text_sensor:`.
@@ -53,6 +55,8 @@
    - `wifi_password`
    - `forecast_api_key`
    - `forecast_ota_password`
+   - `forecast_web_username`
+   - `forecast_web_password`
 2. Додайте пристрій у Home Assistant через інтеграцію ESPHome.
 3. Скомпілюйте і прошийте.
 
@@ -76,7 +80,7 @@ esphome logs forecast-lab.yaml
 
 ## Що відображається на екрані
 
-- заголовок `Forecast Lab`
+- заголовок `Наявність тривоги та рівень батареї`
 - велике значення температури
 - іконка + значення вологості
 - іконка + швидкість вітру (`m/s`)
@@ -93,4 +97,4 @@ esphome logs forecast-lab.yaml
 Визначається в `substitutions`:
 
 - проєкт: `forecast.lab`
-- версія: `1.1.0`
+- версія: `1.3.0`
