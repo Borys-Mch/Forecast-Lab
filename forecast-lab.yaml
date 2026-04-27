@@ -2,7 +2,7 @@ substitutions:
   device_name: forecast-lab
   project_name: "forecast.lab"
   friendly_name: "Forecast Lab"
-  version: "1.3.0"
+  version: "1.5.1"
 
 esphome:
   name: ${device_name}
@@ -177,6 +177,10 @@ sensor:
     id: battery_level
     entity_id: sensor.battery_monitor_4s_battery_level
 
+  - platform: homeassistant
+    id: feels_like_temperature
+    entity_id: sensor.weathersense_feels_like_temperature
+
 binary_sensor:
   - platform: homeassistant
     id: air_alert
@@ -203,6 +207,10 @@ button:
     icon: "mdi:restart"
 
 image:
+  - file: mdi:cancel
+    id: icon_no_image
+    resize: 80x80
+    type: binary
   - file: mdi:weather-sunny
     id: icon_weather_sunny
     resize: 80x80
@@ -234,6 +242,10 @@ image:
   - file: mdi:rocket-launch-outline
     id: icon_rocket_launch
     resize: 20x20
+    type: binary
+  - file: mdi:home-thermometer-outline
+    id: icon_home_thermometer
+    resize: 26x26
     type: binary
   - file: mdi:battery-high
     id: icon_battery_full
@@ -277,8 +289,8 @@ display:
       it.fill(bg);
 
       if (id(air_alert).state) {
-        it.image(10, 12, id(icon_rocket_launch), Color(255, 80, 80), bg);
-        it.printf(35, 12, id(cyr_small), Color(255, 80, 80), "ТРИВОГА");
+        it.image(10, 12, id(icon_rocket_launch), Color(111, 111, 255), bg);
+        it.printf(35, 12, id(cyr_small), Color(111, 111, 255), "ТРИВОГА");
       } else { 
         it.image(10, 12, id(icon_rocket_launch), Color(180, 180, 180), bg);
         it.printf(35, 12, id(cyr_small), Color(180, 180, 180), "Безпечно");
@@ -304,40 +316,51 @@ display:
 
       it.line(10, 40, 230, 40, Color(80, 80, 80));
 
-      it.image(10, 153, id(icon_weather_humidity), Color(215, 185, 155), bg);
-
-      if (!isnan(id(outside_temp).state)) {
-        it.printf(100, 70, id(large), Color(200, 200, 200), "%.1f°", id(outside_temp).state);
-      } else {
-        it.printf(100, 100, id(medium), Color(180, 180, 180), "no data");
-      }
-
-      if (!isnan(id(outside_humidity).state)) {
-        it.printf(40, 150, id(medium), Color(180, 180, 180), "%.0f%%", id(outside_humidity).state);
-      } else {
-        it.printf(40, 150, id(medium), Color(180, 180, 180), "no data");
-      }
-
-      if (!isnan(id(weather_wind_speed).state)) {
-        it.image(100, 153, id(icon_weather_windy), Color(215, 185, 155), bg);
-        it.printf(130, 150, id(medium), Color(180, 180, 180), "%.1f m/s", id(weather_wind_speed).state);
-      }
-
-
       if (id(weather_state).has_state()) {
         auto s = id(weather_state).state;
 
         if (s == "sunny" || s == "clear-night") {
-          it.image(10, 58, id(icon_weather_sunny), Color(0, 215, 255), bg);
+          it.image(10, 53, id(icon_weather_sunny), Color(0, 215, 255), bg);
         } else if (s == "cloudy" || s == "partlycloudy" || s == "overcast") {
-          it.image(10, 58, id(icon_weather_cloudy), Color(240, 185, 115), bg);
+          it.image(10, 53, id(icon_weather_cloudy), Color(240, 185, 115), bg);
         } else if (s == "rainy" || s == "pouring" || s == "lightning-rainy") {
-          it.image(10, 58, id(icon_weather_rainy), Color(255, 170, 90), bg);
+          it.image(10, 53, id(icon_weather_rainy), Color(255, 170, 90), bg);
         } else if (s == "snowy" || s == "snowy-rainy") {
-          it.image(10, 58, id(icon_weather_snowy), Color::WHITE, bg);
+          it.image(10, 53, id(icon_weather_snowy), Color::WHITE, bg);
         } else if (s == "lightning") {
-          it.image(10, 58, id(icon_weather_lightning), Color(255, 220, 80), bg);
+          it.image(10, 53, id(icon_weather_lightning), Color(255, 220, 80), bg);
         }
       } else {
-        it.printf(10, 58, id(medium), Color(180, 180, 180), "no data");
+        it.image(10, 53, id(icon_no_image), Color(180, 180, 180), bg);
       }
+
+      if (!isnan(id(outside_temp).state)) {
+        it.printf(100, 60, id(large), Color(200, 200, 200), "%.1f°", id(outside_temp).state);
+      } else {
+        it.printf(100, 90, id(medium), Color(180, 180, 180), "no data");
+      }
+
+
+      if (!isnan(id(feels_like_temperature).state)) {
+        it.printf(20, 143, id(cyr_small), Color(180, 180, 180), "Відчувається:");
+        it.printf(155, 137, id(medium), Color(200, 200, 200), "%.1f°", id(feels_like_temperature).state);
+      } else {
+        it.printf(40, 140, id(medium), Color(180, 180, 180), "no data");
+      }
+
+      it.line(0, 180, 240, 180, Color(80, 80, 80));
+
+      it.image(10, 193, id(icon_weather_humidity), Color(215, 185, 155), bg);
+
+      if (!isnan(id(outside_humidity).state)) {
+        it.printf(40, 190, id(medium), Color(180, 180, 180), "%.0f%%", id(outside_humidity).state);
+      } else {
+        it.printf(40, 190, id(medium), Color(180, 180, 180), "no data");
+      }
+
+      if (!isnan(id(weather_wind_speed).state)) {
+        it.image(100, 193, id(icon_weather_windy), Color(215, 185, 155), bg);
+        it.printf(130, 190, id(medium), Color(180, 180, 180), "%.1f m/s", id(weather_wind_speed).state);
+      }
+
+      it.line(0, 230, 240, 230, Color(80, 80, 80));
